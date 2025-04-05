@@ -1,17 +1,16 @@
-
-```markdown
 # 🛡️ GitHub Repository Security Analyzer
 
-![Security](https://img.shields.io/badge/Security-blue)
-![Static Analysis](https://img.shields.io/badge/Static%20Analysis-green)
-![Vulnerability Detection](https://img.shields.io/badge/Vulnerability%20Detection-orange)
-![Risk Assessment](https://img.shields.io/badge/Risk%20Assessment-red)
+![Security](https://img.shields.io/badge/-Security-4299e1)
+![Static Analysis](https://img.shields.io/badge/-Static%20Analysis-48bb78)
+![Vulnerability Detection](https://img.shields.io/badge/-Vulnerability%20Detection-ed8936)
+![Risk Assessment](https://img.shields.io/badge/-Risk%20Assessment-f56565)
 
 A powerful web application that analyzes GitHub repositories for security vulnerabilities, code quality issues, sensitive data exposure, and compliance with security best practices.
 
-> 💡 Protect your codebase from security threats and identify vulnerabilities before they become exploitable!
+> 💡 **Protect your codebase from security threats and identify vulnerabilities before they become exploitable!**
 
 ## 📋 Table of Contents
+
 - [Features](#features)
 - [Demo](#demo)
 - [Installation](#installation)
@@ -24,14 +23,18 @@ A powerful web application that analyzes GitHub repositories for security vulner
 - [License](#license)
 
 ## ✨ Features
-- **🔍 Dependency Scanning:** Automatically detects vulnerable dependencies by cross-referencing with the National Vulnerability Database (NVD) and CVE records.
-- **🔑 Secret Detection:** Identifies exposed API keys, tokens, passwords, and credentials using pattern matching and entropy analysis.
-- **📊 Code Quality Analysis:** Evaluates code for security anti-patterns, insecure coding practices, and potential vulnerabilities like SQL injection, XSS, and CSRF.
-- **📝 Best Practices Check:** Verifies compliance with security best practices and industry standards including OWASP Top 10.
-- **📈 Risk Visualization:** Interactive dashboards display security findings with severity ratings and risk scores for better prioritization.
-- **📄 Comprehensive Reports:** Generates detailed reports with actionable remediation steps and verification procedures for each finding.
+
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Dependency Scanning** | Automatically detects vulnerable dependencies by cross-referencing with the National Vulnerability Database (NVD) and CVE records. |
+| 🔑 **Secret Detection** | Identifies exposed API keys, tokens, passwords, and credentials using pattern matching and entropy analysis. |
+| 📊 **Code Quality Analysis** | Evaluates code for security anti-patterns, insecure coding practices, and potential vulnerabilities like SQL injection, XSS, and CSRF. |
+| 📝 **Best Practices Check** | Verifies compliance with security best practices and industry standards including OWASP Top 10. |
+| 📈 **Risk Visualization** | Interactive dashboards display security findings with severity ratings and risk scores for better prioritization. |
+| 📄 **Comprehensive Reports** | Generates detailed reports with actionable remediation steps and verification procedures for each finding. |
 
 ## 🎬 Demo
+
 See the GitHub Repository Security Analyzer in action:
 
 ![Demo Screenshot](https://cdn.jsdelivr.net/gh/user-placeholder/github-security-analyzer/screenshots/dashboard-demo.png)
@@ -40,39 +43,47 @@ See the GitHub Repository Security Analyzer in action:
 ## ⚙️ Installation
 
 ### Prerequisites
+
 - Node.js (v14.0.0 or higher)
 - NPM (v6.0.0 or higher)
 - Git
 - GitHub API token (for authentication)
 
 ### Step 1: Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/github-security-analyzer.git
 cd github-security-analyzer
 ```
 
 ### Step 2: Install dependencies
+
 ```bash
 npm install
 ```
 
 ### Step 3: Configure environment variables
+
 Create a `.env` file in the root directory with the following variables:
-```env
+
+```
 GITHUB_API_TOKEN=your_github_api_token
 PORT=3000
 NODE_ENV=development
 ```
 
 ### Step 4: Start the application
+
 ```bash
 npm start
 ```
+
 The application will be available at `http://localhost:3000`
 
 ## 🚀 Usage
 
 ### Analyzing a Repository
+
 1. Navigate to the GitHub Repository Security Analyzer web application.
 2. Enter a valid GitHub repository URL in the input field (e.g., `https://github.com/username/repository`).
 3. Select the analysis options you'd like to perform:
@@ -85,6 +96,7 @@ The application will be available at `http://localhost:3000`
 6. Review the security analysis results on the dashboard.
 
 ### Example
+
 ```javascript
 // Using the API programmatically
 const axios = require('axios');
@@ -115,24 +127,28 @@ analyzeRepository();
 The GitHub Repository Security Analyzer performs multi-layered security analysis:
 
 ### Dependency Vulnerability Scanning
+
 - Parses dependency files (package.json, requirements.txt, Gemfile, etc.)
 - Cross-references dependencies with vulnerability databases (NVD, CVE)
 - Calculates CVSS scores for risk assessment
 - Identifies outdated packages with security patches available
 
 ### Secret and Credential Detection
+
 - Scans for API keys, tokens, passwords, and private keys
 - Uses pattern matching and entropy analysis
 - Checks commit history for previously exposed secrets
 - Minimizes false positives with machine learning algorithms
 
 ### Code Quality Analysis
+
 - Identifies security anti-patterns in code
 - Detects potential injection vulnerabilities (SQL, XSS, CSRF)
 - Evaluates input validation and output encoding practices
 - Checks for deprecated or insecure function usage
 
 ### Security Best Practices Assessment
+
 - Verifies security configuration files and headers
 - Evaluates authentication and authorization mechanisms
 - Assesses secure communication protocols
@@ -145,6 +161,7 @@ The GitHub Repository Security Analyzer performs multi-layered security analysis
 The security analyzer generates comprehensive reports with the following sections:
 
 ### Executive Summary
+
 High-level overview of the security posture, including:
 - Overall risk score and rating
 - Number of findings by severity
@@ -152,6 +169,7 @@ High-level overview of the security posture, including:
 - Key recommendations for improvement
 
 ### Detailed Findings
+
 For each security issue detected, the report includes:
 - **Vulnerability Details:** Name, identifier, severity, affected component
 - **Attack Vector:** Exploitation methods and prerequisites
@@ -160,6 +178,7 @@ For each security issue detected, the report includes:
 - **Verification Steps:** How to confirm the vulnerability is fixed
 
 ### Export Formats
+
 Reports can be exported in multiple formats:
 - PDF (detailed report with visualizations)
 - CSV (tabular data for further analysis)
@@ -167,13 +186,15 @@ Reports can be exported in multiple formats:
 - HTML (interactive web report)
 
 ### Report Sample
-**Vulnerability Summary**
+
+#### Vulnerability Summary
+
 | Severity | Count | Risk Score |
-| --- | --- | --- |
-| ![Critical](https://img.shields.io/badge/Critical-red) | 2 | 9.8 |
-| ![High](https://img.shields.io/badge/High-orange) | 4 | 7.5 |
-| ![Medium](https://img.shields.io/badge/Medium-blue) | 7 | 5.2 |
-| ![Low](https://img.shields.io/badge/Low-green) | 12 | 3.1 |
+|----------|-------|------------|
+| **Critical** | 2 | 9.8 |
+| **High** | 4 | 7.5 |
+| **Medium** | 7 | 5.2 |
+| **Low** | 12 | 3.1 |
 
 ## 💻 Technologies
 
@@ -202,6 +223,7 @@ Reports can be exported in multiple formats:
 The analyzer can be configured through the `config.js` file or environment variables:
 
 ### Security Analysis Options
+
 ```javascript
 // config.js
 module.exports = {
@@ -246,7 +268,7 @@ module.exports = {
   
   // Reporting configuration
   reporting: {
-    formats: ['html', 'pdf', json'],
+    formats: ['html', 'pdf', 'json'],
     includeRemediationSteps: true,
     includeCodeSnippets: true
   }
@@ -254,8 +276,10 @@ module.exports = {
 ```
 
 ### Environment Variables
+
 Environment variables override configuration settings in `config.js`:
-```env
+
+```
 GITHUB_API_TOKEN=your_github_api_token
 ANALYSIS_DEPENDENCIES_ENABLED=true
 ANALYSIS_SECRETS_ENABLED=true
@@ -270,6 +294,7 @@ LOG_LEVEL=info
 Contributions to the GitHub Repository Security Analyzer are welcome! Here's how to contribute:
 
 ### Getting Started
+
 1. Fork the repository
 2. Clone your forked repository
 3. Create a new branch (`git checkout -b feature/amazing-feature`)
@@ -280,6 +305,7 @@ Contributions to the GitHub Repository Security Analyzer are welcome! Here's how
 8. Open a Pull Request
 
 ### Development Setup
+
 ```bash
 git clone https://github.com/yourusername/github-security-analyzer.git
 cd github-security-analyzer
@@ -288,29 +314,34 @@ npm run dev  # Starts the development server with hot-reloading
 ```
 
 ### Code Style
+
 We use ESLint and Prettier to maintain code quality. Before submitting a PR, please ensure your code passes all linting checks:
+
 ```bash
 npm run lint
 npm run format
 ```
 
 ### Testing
+
 All new features should include appropriate tests:
+
 ```bash
-npm test                # Run all tests
-npm run test:unit       # Run unit tests
-npm run test:integration # Run integration tests
-npm run test:coverage   # Generate test coverage report
+npm test               # Run all tests
+npm run test:unit      # Run unit tests
+npm run test:integration  # Run integration tests
+npm run test:coverage  # Generate test coverage report
 ```
 
 ### Feature Requests and Bug Reports
+
 Please use the GitHub issues tracker to report bugs or suggest features.
 
 > 🙏 **Thank you for contributing!** Your efforts help make the GitHub Repository Security Analyzer better for everyone.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](#) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ```
 MIT License
@@ -335,11 +366,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
 ---
 
 🛡️ **GitHub Repository Security Analyzer** - Securing code repositories one scan at a time.
 
 Made with ❤️ by security enthusiasts
-```
-
-Feel free to copy and paste this Markdown content into your `README.md` file!
