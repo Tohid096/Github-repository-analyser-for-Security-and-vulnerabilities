@@ -1,4 +1,3 @@
-Certainly! Here is the provided HTML content converted into Markdown:
 
 ```markdown
 # 🛡️ GitHub Repository Security Analyzer
