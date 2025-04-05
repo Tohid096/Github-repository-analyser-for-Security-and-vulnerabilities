@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Security Analyzer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">GitHub Security Analyzer</h1>
+            <p class="text-lg text-gray-600">Analyze repositories for security risks and vulnerabilities</p>
+        </header>
+
+        <!-- Input Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-grow">
+                    <label for="repo-url" class="block text-sm font-medium text-gray-700 mb-1">GitHub Repository URL</label>
+                    <input type="text" id="repo-url" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="https://github.com/username/repository"
+                        value="https://github.com/facebook/react">
+                </div>
+                <div class="flex items-end">
+                    <button id="analyze-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-search mr-2"></i>Analyze
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden text-center py-20">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p class="text-lg text-gray-700" id="loading-text">Analyzing repository...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-container" class="hidden">
+            <!-- Overview Card -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Security Analysis Overview</h2>
+                    <div class="mt-2 md:mt-0 bg-gray-100 px-4 py-2 rounded-full">
+                        <span class="text-sm font-medium" id="repo-name">facebook/react</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-500 mb-1">Total Issues</h3>
+                        <p class="text-2xl font-bold" id="total-issues">0</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-500 mb-1">Critical</h3>
+                        <p class="text-2xl font-bold text-red-600" id="critical-issues">0</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-500 mb-1">High</h3>
+                        <p class="text-2xl font-bold text-orange-500" id="high-issues">0</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-500 mb-1">Security Score</h3>
+                        <p class="text-2xl font-bold text-blue-600" id="security-score">0%</p>
+                    </div>
+                </div>
+                
+                <div class="h-60">
+                    <canvas id="overview-chart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Vulnerability Tabs -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="border-b border-gray-200">
+                    <nav class="flex -mb-px">
+                        <button class="tab-btn active-tab" data-tab="dependencies">
+                            <i class="fas fa-cubes mr-2"></i>Dependencies
+                        </button>
+                        <button class="tab-btn" data-tab="secrets">
+                            <i class="fas fa-key mr-2"></i>Secrets Detection
+                        </button>
+                        <button class="tab-btn" data-tab="code-quality">
+                            <i class="fas fa-code mr-2"></i>Code Quality
+                        </button>
+                        <button class="tab-btn" data-tab="best-practices">
+                            <i class="fas fa-shield-alt mr-2"></i>Security Best Practices
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Tab Content -->
+                <div id="tab-content" class="p-6">
+                    <div id="dependencies-content" class="tab-content">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-medium text-gray-800 mb-2">Vulnerable Dependencies</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severity</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dependencies-table" class="bg-white divide-y divide-gray-200">
+                                        <!-- Will be filled by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="secrets-content" class="tab-content hidden">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-medium text-gray-800 mb-2">Detected Secrets and Keys</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Path</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="secrets-table" class="bg-white divide-y divide-gray-200">
+                                        <!-- Will be filled by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="code-quality-content" class="tab-content hidden">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-medium text-gray-800 mb-2">Code Quality Issues</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Path</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Line</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="code-quality-table" class="bg-white divide-y divide-gray-200">
+                                        <!-- Will be filled by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="best-practices-content" class="tab-content hidden">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-medium text-gray-800 mb-2">Security Best Practices</h3>
+                            <div id="best-practices-container">
+                                <!-- Will be filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Security Recommendations</h2>
+                <ul id="recommendations-list" class="list-disc pl-5 space-y-2">
+                    <!-- Will be filled by JavaScript -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .tab-btn {
+            @apply text-gray-500 hover:text-gray-700 py-4 px-6 font-medium border-b-2 border-transparent hover:border-gray-300 focus:outline-none;
+        }
+        .active-tab {
+            @apply text-blue-600 border-blue-600;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    tabButtons.forEach(btn => btn.classList.remove('active-tab'));
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active-tab');
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => content.classList.add('hidden'));
+                    
+                    // Show the selected tab content
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-content`).classList.remove('hidden');
+                });
+            });
+
+            // Analyze button click handler
+            const analyzeBtn = document.getElementById('analyze-btn');
+            analyzeBtn.addEventListener('click', performAnalysis);
+
+            // Initial chart setup
+            let overviewChart;
+            
+            function performAnalysis() {
+                const repoUrl = document.getElementById('repo-url').value;
+                
+                if (!repoUrl || !isValidGithubUrl(repoUrl)) {
+                    alert('Please enter a valid GitHub repository URL');
+                    return;
+                }
+                
+                // Show loading state
+                document.getElementById('loading-state').classList.remove('hidden');
+                document.getElementById('results-container').classList.add('hidden');
+                
+                const loadingMessages = [
+                    'Analyzing repository structure...',
+                    'Scanning dependencies for vulnerabilities...',
+                    'Checking for exposed secrets and API keys...',
+                    'Analyzing code quality and potential security issues...',
+                    'Validating security best practices...',
+                    'Generating security recommendations...',
+                    'Compiling final security report...'
+                ];
+                
+                let messageIndex = 0;
+                const loadingText = document.getElementById('loading-text');
+                
+                const loadingInterval = setInterval(() => {
+                    loadingText.textContent = loadingMessages[messageIndex];
+                    messageIndex = (messageIndex + 1) % loadingMessages.length;
+                }, 1500);
+                
+                // Simulate analysis process (in a real app, this would be an API call)
+                setTimeout(() => {
+                    clearInterval(loadingInterval);
+                    document.getElementById('loading-state').classList.add('hidden');
+                    document.getElementById('results-container').classList.remove('hidden');
+                    
+                    // Extract repo name from URL for display
+                    const repoName = extractRepoName(repoUrl);
+                    document.getElementById('repo-name').textContent = repoName;
+                    
+                    // Generate and display mock results
+                    generateMockResults(repoName);
+                }, 5000);
+            }
+            
+            function isValidGithubUrl(url) {
+                return /^https?:\/\/(www\.)?github\.com\/[^\/]+\/[^\/]+/.test(url);
+            }
+            
+            function extractRepoName(url) {
+                const match = url.match(/github\.com\/([^\/]+\/[^\/]+)/);
+                return match ? match[1] : 'Unknown Repository';
+            }
+            
+            function generateMockResults(repoName) {
+                // Generate random but realistic-looking security issues
+                const criticalIssues = Math.floor(Math.random() * 3);
+                const highIssues = Math.floor(Math.random() * 5) + 1;
+                const mediumIssues = Math.floor(Math.random() * 8) + 2;
+                const lowIssues = Math.floor(Math.random() * 10) + 4;
+                
+                const totalIssues = criticalIssues + highIssues + mediumIssues + lowIssues;
+                const securityScore = Math.max(0, 100 - (criticalIssues * 15 + highIssues * 5 + mediumIssues * 2 + lowIssues * 0.5));
+                
+                // Update overview numbers
+                document.getElementById('total-issues').textContent = totalIssues;
+                document.getElementById('critical-issues').textContent = criticalIssues;
+                document.getElementById('high-issues').textContent = highIssues;
+                document.getElementById('security-score').textContent = Math.round(securityScore) + '%';
+                
+                // Update chart
+                updateOverviewChart(criticalIssues, highIssues, mediumIssues, lowIssues);
+                
+                // Generate mock dependency vulnerabilities
+                generateMockDependencies(repoName);
+                
+                // Generate mock secrets detection
+                generateMockSecrets(repoName);
+                
+                // Generate mock code quality issues
+                generateMockCodeQuality(repoName);
+                
+                // Generate mock best practices
+                generateMockBestPractices();
+                
+                // Generate recommendations
+                generateMockRecommendations();
+            }
+            
+            function updateOverviewChart(critical, high, medium, low) {
+                const ctx = document.getElementById('overview-chart').getContext('2d');
+                
+                if (overviewChart) {
+                    overviewChart.destroy();
+                }
+                
+                overviewChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Critical', 'High', 'Medium', 'Low'],
+                        datasets: [{
+                            label: 'Security Issues',
+                            data: [critical, high, medium, low],
+                            backgroundColor: [
+                                'rgba(220, 38, 38, 0.8)',
+                                'rgba(251, 146, 60, 0.8)',
+                                'rgba(251, 191, 36, 0.8)',
+                                'rgba(96, 165, 250, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgb(220, 38, 38)',
+                                'rgb(251, 146, 60)',
+                                'rgb(251, 191, 36)',
+                                'rgb(96, 165, 250)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function generateMockDependencies(repoName) {
+                const dependencies = [
+                    {
+                        package: 'lodash',
+                        version: '4.17.15',
+                        severity: 'Critical',
+                        description: 'Prototype pollution vulnerability in lodash before 4.17.19'
+                    },
+                    {
+                        package: 'axios',
+                        version: '0.21.0',
+                        severity: 'High',
+                        description: 'Server-side request forgery vulnerability in axios before 0.21.1'
+                    },
+                    {
+                        package: 'react-dom',
+                        version: '16.13.0',
+                        severity: 'Medium',
+                        description: 'Cross-site scripting vulnerability in React DOM'
+                    },
+                    {
+                        package: 'express',
+                        version: '4.16.0',
+                        severity: 'Medium',
+                        description: 'Denial of service vulnerability in express dependency'
+                    },
+                    {
+                        package: 'moment',
+                        version: '2.24.0',
+                        severity: 'Low',
+                        description: 'Regular expression denial of service in moment.js'
+                    }
+                ];
+                
+                const tbody = document.getElementById('dependencies-table');
+                tbody.innerHTML = '';
+                
+                if (Math.random() > 0.3) { // Sometimes show no vulnerabilities for variety
+                    dependencies.forEach(dep => {
+                        if (Math.random() > 0.5) { // Randomly include some deps
+                            const row = document.createElement('tr');
+                            
+                            const severityClass = 
+                                dep.severity === 'Critical' ? 'text-red-600' :
+                                dep.severity === 'High' ? 'text-orange-500' :
+                                dep.severity === 'Medium' ? 'text-yellow-500' : 'text-blue-500';
+                            
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${dep.package}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dep.version}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm ${severityClass} font-medium">${dep.severity}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">${dep.description}</td>
+                            `;
+                            
+                            tbody.appendChild(row);
+                        }
+                    });
+                }
+                
+                if (tbody.children.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No vulnerable dependencies found</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            }
+            
+            function generateMockSecrets(repoName) {
+                const secrets = [
+                    {
+                        filePath: 'config/database.js',
+                        type: 'Database Password',
+                        riskLevel: 'Critical',
+                        description: 'Hardcoded database password found in configuration file'
+                    },
+                    {
+                        filePath: '.env',
+                        type: 'API Key',
+                        riskLevel: 'High',
+                        description: 'AWS access key exposed in environment file committed to repository'
+                    },
+                    {
+                        filePath: 'tests/integration/api_tests.js',
+                        type: 'Authentication Token',
+                        riskLevel: 'Medium',
+                        description: 'Test authentication token hardcoded in test file'
+                    },
+                    {
+                        filePath: 'src/services/oauth.js',
+                        type: 'OAuth Secret',
+                        riskLevel: 'High',
+                        description: 'OAuth client secret stored in source code'
+                    }
+                ];
+                
+                const tbody = document.getElementById('secrets-table');
+                tbody.innerHTML = '';
+                
+                if (Math.random() > 0.6) { // Sometimes show no secrets for variety
+                    secrets.forEach(secret => {
+                        if (Math.random() > 0.6) { // Randomly include some secrets
+                            const row = document.createElement('tr');
+                            
+                            const riskClass = 
+                                secret.riskLevel === 'Critical' ? 'text-red-600' :
+                                secret.riskLevel === 'High' ? 'text-orange-500' :
+                                secret.riskLevel === 'Medium' ? 'text-yellow-500' : 'text-blue-500';
+                            
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${secret.filePath}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${secret.type}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm ${riskClass} font-medium">${secret.riskLevel}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">${secret.description}</td>
+                            `;
+                            
+                            tbody.appendChild(row);
+                        }
+                    });
+                }
+                
+                if (tbody.children.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No exposed secrets or API keys found</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            }
+            
+            function generateMockCodeQuality(repoName) {
+                const codeIssues = [
+                    {
+                        filePath: 'src/utils/validation.js',
+                        line: 42,
+                        type: 'SQL Injection',
+                        description: 'Unsanitized user input used in SQL query'
+                    },
+                    {
+                        filePath: 'src/controllers/userController.js',
+                        line: 78,
+                        type: 'XSS Vulnerability',
+                        description: 'Unescaped user input rendered in HTML'
+                    },
+                    {
+                        filePath: 'src/middleware/auth.js',
+                        line: 23,
+                        type: 'Insecure Authentication',
+                        description: 'Weak token validation in authentication middleware'
+                    },
+                    {
+                        filePath: 'src/api/routes.js',
+                        line: 105,
+                        type: 'CSRF Vulnerability',
+                        description: 'Missing CSRF token validation in form submission'
+                    },
+                    {
+                        filePath: 'src/services/fileUpload.js',
+                        line: 56,
+                        type: 'Path Traversal',
+                        description: 'Unsanitized file paths could lead to directory traversal'
+                    }
+                ];
+                
+                const tbody = document.getElementById('code-quality-table');
+                tbody.innerHTML = '';
+                
+                if (Math.random() > 0.4) { // Sometimes show no code issues for variety
+                    codeIssues.forEach(issue => {
+                        if (Math.random() > 0.5) { // Randomly include some issues
+                            const row = document.createElement('tr');
+                            
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${issue.filePath}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${issue.line}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">${issue.type}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">${issue.description}</td>
+                            `;
+                            
+                            tbody.appendChild(row);
+                        }
+                    });
+                }
+                
+                if (tbody.children.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No code quality issues found</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            }
+            
+            function generateMockBestPractices() {
+                const bestPractices = [
+                    {
+                        name: 'Security Policy',
+                        status: Math.random() > 0.5,
+                        description: 'Repository has a SECURITY.md file with vulnerability reporting instructions'
+                    },
+                    {
+                        name: 'Dependency Scanning',
+                        status: Math.random() > 0.5,
+                        description: 'Repository is configured with automated dependency scanning'
+                    },
+                    {
+                        name: 'Code Signing',
+                        status: Math.random() > 0.5,
+                        description: 'Releases are cryptographically signed'
+                    },
+                    {
+                        name: 'Branch Protection',
+                        status: Math.random() > 0.5,
+                        description: 'Main branch has protection rules requiring code review'
+                    },
+                    {
+                        name: 'Secret Scanning',
+                        status: Math.random() > 0.5,
+                        description: 'Repository has GitHub secret scanning enabled'
+                    },
+                    {
+                        name: 'Security Testing',
+                        status: Math.random() > 0.5,
+                        description: 'CI pipeline includes security testing stages'
+                    }
+                ];
+                
+                const container = document.getElementById('best-practices-container');
+                container.innerHTML = '';
+                
+                const list = document.createElement('ul');
+                list.className = 'divide-y divide-gray-200';
+                
+                bestPractices.forEach(practice => {
+                    const item = document.createElement('li');
+                    item.className = 'py-4';
+                    
+                    const statusIcon = practice.status ? 
+                        '<i class="fas fa-check-circle text-green-500 mr-2"></i>' : 
+                        '<i class="fas fa-times-circle text-red-500 mr-2"></i>';
+                    
+                    item.innerHTML = `
+                        <div class="flex items-center">
+                            ${statusIcon}
+                            <div>
+                                <h4 class="text-md font-medium text-gray-900">${practice.name}</h4>
+                                <p class="text-sm text-gray-500">${practice.description}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    list.appendChild(item);
+                });
+                
+                container.appendChild(list);
+            }
+            
+            function generateMockRecommendations() {
+                const recommendations = [
+                    'Update vulnerable dependencies to their latest secure versions',
+                    'Implement a .gitignore file to prevent committing sensitive files',
+                    'Enable branch protection rules requiring code review before merging',
+                    'Add a SECURITY.md file with instructions for reporting vulnerabilities',
+                    'Implement automated dependency scanning in CI/CD pipeline',
+                    'Remove hardcoded secrets and use environment variables or a secure vault',
+                    'Implement Content Security Policy to mitigate XSS attacks',
+                    'Add automated security testing to the testing suite',
+                    'Use HTTPS for all external connections',
+                    'Implement proper input validation and sanitization'
+                ];
+                
+                const list = document.getElementById('recommendations-list');
+                list.innerHTML = '';
+                
+                // Randomly select 4-6 recommendations
+                const selectedRecommendations = [];
+                while (selectedRecommendations.length < Math.floor(Math.random() * 3) + 4) {
+                    const randomIndex = Math.floor(Math.random() * recommendations.length);
+                    const recommendation = recommendations[randomIndex];
+                    
+                    if (!selectedRecommendations.includes(recommendation)) {
+                        selectedRecommendations.push(recommendation);
+                    }
+                }
+                
+                selectedRecommendations.forEach(recommendation => {
+                    const item = document.createElement('li');
+                    item.className = 'text-gray-700';
+                    item.textContent = recommendation;
+                    list.appendChild(item);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
