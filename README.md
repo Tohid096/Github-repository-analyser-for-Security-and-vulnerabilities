@@ -1,7 +1,3 @@
-# Github-repository-analyser-for-Security-and-vulnerabilities
-Here's the README converted into pure markdown format for your GitHub repository:
-
-```markdown
 # 🛡️ GitHub Repository Security Analyzer
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -245,12 +241,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <p align="center">
   Made with ❤️ by <a href="https://github.com/yourusername">Your Name</a>
 </p>
-```
 
-This markdown is ready to be pasted directly into your README.md file. You'll need to:
+---
 
-1. Replace `yourusername` with your actual GitHub username
-2. Update the placeholder image links with real screenshots when available
-3. Customize any project-specific details to match your implementation
-
-The markdown includes all the sections from the original HTML version, properly formatted with emojis, code blocks, tables, and other elements preserved.
+You can view or download this README as a PDF using the "Export to PDF" button in the [web version](https://page.genspark.site/page/toolu_015YKs7oMHiXaXyZYngpGc9a/github_security_analyzer_readme.html).
